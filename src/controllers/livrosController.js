@@ -54,7 +54,7 @@ class LivroController {
 
     livros.findByIdAndDelete(id, (err) => {
       if(!err){
-        res.status(200).send({message: 'Livro removido com sucesso'})
+        res.status(200).send({message: 'Livro excluído com sucesso!'})
       } else {
         res.status(500).send({message: err.message})
       }
