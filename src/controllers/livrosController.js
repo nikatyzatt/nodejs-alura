@@ -17,7 +17,7 @@ class LivroController {
       .populate('autor', 'nome')
       .exec((err, livros) => {
       if(err) {
-        res.status(400).send({message: `${err.message} - Id do livro não localizado.`})
+        res.status(404).send({message: `Id do livro não localizado.`})
       } else {
         res.status(200).send(livros);
       }
@@ -63,12 +63,39 @@ class LivroController {
 
   static listarLivroPorEditora = (req, res) => {
     const editora = req.query.editora
+    const autor = req.query.autor
 
-    livros.find({'editora': editora}, {}, (err, livros) => {
+    const promiseLivrosPorEditora = new Promise((resolve, reject) => {
+      if (editora) {
+      livros.find({'editora': editora}, {}, (err, livros) => {
+      if (err) reject(err);
+      resolve(livros);
+      })
+      } else {
+      resolve([]);
+      }
+      });
+      
+      const promiseLivrosPorAutor = new Promise((resolve, reject) => {
+      if (autor) {
+      livros.find({'autor': autor}, {}, (err, livros) => {
+      if (err) reject(err);
+      resolve(livros);
+      })
+      } else {
+      resolve([]);
+      }
+      });
+      
+      Promise.all([promiseLivrosPorEditora, promiseLivrosPorAutor])
+      .then(([livrosPorEditora, livrosPorAutor]) => {
+      const livros = livrosPorEditora.concat(livrosPorAutor);
       res.status(200).send(livros);
-
-    })
-  }
+      })
+      .catch(err => {
+      res.status(500).send({ message: err.message });
+      })
+      }
 
 
 
